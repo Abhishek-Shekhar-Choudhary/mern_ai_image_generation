@@ -1,0 +1,30 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+
+# Local environment variables
+.env
+.env.local
+server/.env
+client/.env
+
+# Logs
+logs
+*.log
+*.log.*
+pids
+*.pid
+*.seed
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
