@@ -6,7 +6,7 @@
 //   plugins: [react()],
 //   server: {
 //     proxy: {
-//       '/api': 'http://localhost:8080', // Change 8080 to your backend port
+//       '/api': 'https://ai-image-generation-zqlw.onrender.com/', // Change  to your backend port
 //     },
 //   },
 // })
