@@ -18,8 +18,10 @@
     "form-data": "^4.0.4",
     "mongoose": "^8.17.0",
     "node-fetch": "^3.3.2",
-    "nodemon": "^3.1.10",
     "openai": "^5.11.0",
     "react-router-dom": "^7.7.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

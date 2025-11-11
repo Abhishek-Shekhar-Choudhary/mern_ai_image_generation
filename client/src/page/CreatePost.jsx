@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { preview } from '../assets';
+//import { preview } from '../assets';
+import preview from '../assets/earth_image.jpg';
+
+
+
 import { getRandomPrompt } from '../utils';
 import { FormField, Loader } from '../components';
 
@@ -119,7 +123,8 @@ const CreatePost = () => {
               <img
                 src={preview}
                 alt="preview"
-                className="w-9/12 h-9/12 object-contain opacity-40"
+                className="w-full h-full object-contain"
+                draggable={false}
               />
             )}
 
