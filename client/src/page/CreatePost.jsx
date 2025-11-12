@@ -32,7 +32,7 @@ const CreatePost = () => {
     if (form.prompt) {
       try {
         setGeneratingImg(true);
-        const response = await fetch('https://ai-image-generation-zqlw.onrender.com/api/v1/dalle', {
+        const response = await fetch('/api/v1/dalle', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -42,8 +42,15 @@ const CreatePost = () => {
           }),
         });
 
+// ...existing code...
         const data = await response.json();
-        setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
+        // setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
+        // server may return either a raw base64 string or a full data URI.
+        const photoValue = typeof data.photo === 'string' && data.photo.startsWith('data:')
+          ? data.photo
+          : `data:image/jpeg;base64,${data.photo}`;
+        setForm({ ...form, photo: photoValue });
+// ...existing code...      
       } catch (err) {
         alert(err);
       } finally {
@@ -60,7 +67,7 @@ const CreatePost = () => {
     if (form.prompt && form.photo) {
       setLoading(true);
       try {
-        const response = await fetch('https://ai-image-generation-zqlw.onrender.com/api/v1/post', {
+        const response = await fetch('/api/v1/post', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
