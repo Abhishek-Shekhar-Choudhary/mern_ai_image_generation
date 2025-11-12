@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "cd server && npm start",
-    "build": "cd server && npm run build",
-    "dev": "cd server && npm run dev"
+    "start": "npm start",
+    "build": "npm run build",
+    "dev": "npm run dev"
   }
 }
