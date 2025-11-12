@@ -1,43 +1,53 @@
 import React, { useEffect, useState } from 'react';
 import { Card, FormField, Loader } from '../components';
+import earthImage from '../assets/earth_image.jpg';
 
-const RenderCards = ({ data, title }) => {
-  if (data?.length > 0) {
-    return (
-      data.map((post) => <Card key={post._id} {...post} />)
-    );
+const RenderCards = ({ data }) => {
+  if (Array.isArray(data) && data.length > 0) {
+    return data.map((post) => <Card key={post._id} {...post} />);
   }
 
-  return (
-    <h2 className="mt-5 font-bold text-[#6469ff] text-xl uppercase">{title}</h2>
-  );
+  // When no posts, RenderCards still returns nothing (we show the image elsewhere)
+  return null;
 };
 
 const Home = () => {
   const [loading, setLoading] = useState(false);
   const [allPosts, setAllPosts] = useState(null);
-
   const [searchText, setSearchText] = useState('');
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [searchedResults, setSearchedResults] = useState(null);
 
+  // Toggle here if you want the image shown ALWAYS or only when no posts.
+  // Set to true to always show the image (what you asked).
+  const alwaysShowImage = true;
+
   const fetchPosts = async () => {
     setLoading(true);
-
     try {
       const response = await fetch('/api/v1/post', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        setAllPosts(result.data.reverse());
+      // Defensive parsing: handle multiple response shapes
+      const text = await response.text();
+      let result = null;
+      try {
+        result = text ? JSON.parse(text) : null;
+      } catch {
+        result = null;
       }
+
+      let posts = [];
+      if (Array.isArray(result)) posts = result;
+      else if (result && Array.isArray(result.data)) posts = result.data;
+      else if (result && Array.isArray(result.posts)) posts = result.posts;
+
+      setAllPosts(Array.isArray(posts) ? posts.slice().reverse() : []);
     } catch (err) {
-      alert(err);
+      console.error('fetchPosts error:', err);
+      setAllPosts([]); // treat as no posts
     } finally {
       setLoading(false);
     }
@@ -48,23 +58,33 @@ const Home = () => {
   }, []);
 
   const handleSearchChange = (e) => {
+    const value = e.target.value;
     clearTimeout(searchTimeout);
-    setSearchText(e.target.value);
+    setSearchText(value);
 
     setSearchTimeout(
       setTimeout(() => {
-        const searchResult = allPosts.filter(
+        const posts = Array.isArray(allPosts) ? allPosts : [];
+        const val = value.toLowerCase().trim();
+        if (!val) {
+          setSearchedResults(null);
+          return;
+        }
+        const searchResult = posts.filter(
           (item) =>
-            item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            item.prompt.toLowerCase().includes(searchText.toLowerCase())
+            (item.name && item.name.toLowerCase().includes(val)) ||
+            (item.prompt && item.prompt.toLowerCase().includes(val))
         );
         setSearchedResults(searchResult);
       }, 500)
     );
   };
 
+  // decide which posts to show
+  const displayPosts = searchText ? (Array.isArray(searchedResults) ? searchedResults : []) : (Array.isArray(allPosts) ? allPosts : []);
+
   return (
-    <section className="max-w-7xl mx-auto">
+    <section className="max-w-7xl mx-auto px-4">
       <div>
         <h1 className="font-extrabold text-[#222328] text-[32px]">The Community Showcase</h1>
         <p className="mt-2 text-[#666e75] text-[14px] max-w-[500px]">
@@ -83,6 +103,17 @@ const Home = () => {
         />
       </div>
 
+      {/* ALWAYS-SHOW IMAGE (hero/banner). Set `alwaysShowImage = false` to revert to showing it only when no posts */}
+      {alwaysShowImage && (
+        <div className="mt-8 w-full">
+          <img
+            src={earthImage}
+            alt="Decorative banner"
+            className="w-full max-h-[600px] object-contain rounded-none"
+          />
+        </div>
+      )}
+
       <div className="mt-10">
         {loading ? (
           <div className="flex justify-center items-center">
@@ -95,13 +126,22 @@ const Home = () => {
                 Showing Results for <span className="text-[#222328]">{searchText}</span>:
               </h2>
             )}
-            <div className="grid lg:grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 grid-cols-1 gap-3">
-              {searchText ? (
-                <RenderCards data={searchedResults} title="No Search Results Found" />
-              ) : (
-                <RenderCards data={allPosts} title="No Posts Yet" />
-              )}
+
+            <div className="grid lg:grid-cols-4 sm:grid-cols-3 xs:grid-cols-2 grid-cols-1 gap-3 mt-4">
+              {/* Render post cards if any */}
+              <RenderCards data={displayPosts} />
             </div>
+
+            {/* If there are no posts at all and you also want the small "no-data" image gallery instead of the hero, uncomment below */}
+            {/* {(!Array.isArray(allPosts) || allPosts.length === 0) && !alwaysShowImage && (
+              <div className="mt-10 flex flex-col items-center justify-center col-span-full">
+                <img
+                  src={earthImage}
+                  alt="No posts yet"
+                  className="w-72 h-72 object-contain opacity-90 rounded-lg shadow-md"
+                />
+              </div>
+            )} */}
           </>
         )}
       </div>
